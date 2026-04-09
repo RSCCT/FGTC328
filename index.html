@@ -66,10 +66,19 @@ ws.onmessage = function(event) {
 };
 
 // 👉 測試模式（先確認畫面用）
+let toggle = false;
+
 setInterval(() => {
-  let r = Math.random() > 0.5 ? "idle" : "idle2";
-  playVideo(r);
-}, 5000);
+  toggle = !toggle;
+
+  if (toggle) {
+    playVideo("idle");
+    console.log("切換 → idle");
+  } else {
+    playVideo("idle2");
+    console.log("切換 → idle2");
+  }
+}, 3000);
 
 </script>
 
