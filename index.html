@@ -57,14 +57,14 @@ function playVideo(name) {
 playVideo("idle");
 
 // 👉 WebSocket 連 ESP32
-const ws = new WebSocket("ws://" + location.hostname + ":81/");
+//const ws = new WebSocket("ws://" + location.hostname + ":81/");
 
-ws.onmessage = function(event) {
-  console.log("收到:", event.data);
+//ws.onmessage = function(event) {
+//  console.log("收到:", event.data);
 
   // ESP32 傳：idle 或 idle2
-  playVideo(event.data);
-};
+//  playVideo(event.data);
+//};
 
 // 👉 測試模式（先確認畫面用）
 let toggle = false;
@@ -73,8 +73,10 @@ setInterval(() => {
   toggle = !toggle;
 
   if (toggle) {
+    console.log("播放 idle");
     playVideo("idle");
   } else {
+    console.log("播放 idle2");
     playVideo("idle2");
   }
 }, 3000);
