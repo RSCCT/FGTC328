@@ -44,11 +44,12 @@ function playVideo(name) {
   if (!url) return;
 
   video.pause();
-  video.src = url;
+
+  video.src = url + "?t=" + Date.now(); // 🔥 防快取
   video.load();
 
   video.play().catch(err => {
-    console.log("需要點擊才會播放");
+    console.log("播放被擋");
   });
 }
 
@@ -73,10 +74,8 @@ setInterval(() => {
 
   if (toggle) {
     playVideo("idle");
-    console.log("切換 → idle");
   } else {
     playVideo("idle2");
-    console.log("切換 → idle2");
   }
 }, 3000);
 
