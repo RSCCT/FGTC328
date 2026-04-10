@@ -4,13 +4,17 @@
   <meta charset="UTF-8">
   <title>ESP32 Video Control</title>
 
-  <!-- 🎨 全螢幕樣式 -->
+  <!-- 📱 手機全螢幕關鍵 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: black;
       overflow: hidden;
+      width: 100%;
+      height: 100%;
     }
 
     #video {
@@ -19,27 +23,16 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      object-fit: cover; /* 🔥 滿版顯示 */
+      object-fit: cover;
       background: black;
-    }
-
-    #testBtn {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-      padding: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🎬 全螢幕影片 -->
-<video id="video" autoplay muted playsinline></video>
-
-<!-- 🔘 測試按鈕 -->
-<button id="testBtn" onclick="testPlay()">測試播放</button>
+<!-- 🎬 影片（預先佔滿畫面） -->
+<video id="video" autoplay muted playsinline preload="auto"></video>
 
 <script type="module">
 
@@ -50,9 +43,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const video = document.getElementById("video");
 
-  console.log("video element:", video);
+  // 🔥 先給一個預設影片（避免一開始縮小）
+  video.src = "https://github.com/RSCCT/FGTC328/raw/main/idle.mp4";
+  video.play().catch(() => {});
 
-  // 🔥 Firebase 設定
+  // 🔥 Firebase
   const firebaseConfig = {
     databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
   };
@@ -60,7 +55,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // 🔥 影片來源（已修正可播放）
   const base = "https://github.com/RSCCT/FGTC328/raw/main/";
 
   const videos = {
@@ -70,57 +64,28 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function playVideo(name) {
 
-    console.log("播放狀態:", name);
-
     const url = videos[name];
+    if (!url) return;
 
-    if (!url) {
-      console.log("❌ 找不到影片:", name);
-      return;
-    }
+    // 🔥 無縫切換（不閃、不縮）
+    if (video.src.includes(url)) return;
 
-    // 🔥 強制刷新（避免卡住）
     video.pause();
-    video.removeAttribute("src");
-    video.load();
-
     video.src = url + "?t=" + Date.now();
 
-    video.play().then(() => {
-      console.log("✅ 播放成功");
-    }).catch(err => {
-      console.log("❌ 播放失敗:", err);
-    });
+    video.play().catch(() => {});
   }
 
-  // 🔥 Firebase 即時監聽
   const stateRef = ref(db, "state");
 
   onValue(stateRef, (snapshot) => {
-
     const state = snapshot.val();
-
-    console.log("Firebase:", state);
-
     if (!state) return;
 
     playVideo(state);
   });
 
 });
-
-// 🔥 手動測試（確認影片 OK）
-window.testPlay = function () {
-  const video = document.getElementById("video");
-
-  video.src = "https://github.com/RSCCT/FGTC328/raw/main/idle.mp4";
-
-  video.play().then(() => {
-    console.log("✅ 測試播放成功");
-  }).catch(err => {
-    console.log("❌ 測試播放失敗:", err);
-  });
-};
 
 </script>
 
