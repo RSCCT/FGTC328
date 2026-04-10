@@ -6,7 +6,11 @@
 
 <script>
 function testPlay() {
-  const video = document.getElementById("video");
+  const base = "https://github.com/RSCCT/FGTC328/raw/main/";
+  const videos = {
+  idle: base + "idle.mp4",
+  idle2: base + "idle2.mp4"
+};
   console.log("測試播放");
 
   video.src = "https://raw.githubusercontent.com/RSCCT/FGTC328/main/idle.mp4";
