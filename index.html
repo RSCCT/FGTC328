@@ -1,71 +1,17 @@
-<script type="module">
+<body>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<video id="video" width="300" controls></video>
 
-window.addEventListener("DOMContentLoaded", () => {
+<button onclick="testPlay()">測試播放</button>
 
+<script>
+function testPlay() {
   const video = document.getElementById("video");
+  console.log("測試播放");
 
-  console.log("video element:", video); // 🔥 debug
-
-  const firebaseConfig = {
-    databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const base = "https://raw.githubusercontent.com/RSCCT/FGTC328/main/";
-
-  const videos = {
-    idle: base + "idle.mp4",
-    idle2: base + "idle2.mp4"
-  };
-
-  function playVideo(name) {
-
-    console.log("try play:", name);
-
-    const url = videos[name];
-
-    if (!url) {
-      console.log("❌ 無此影片:", name);
-      return;
-    }
-
-    // 🔥 強制重新載入
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
-
-    video.src = url + "?t=" + Date.now();
-
-    const p = video.play();
-
-    if (p !== undefined) {
-      p.catch(err => {
-        console.log("❌ play失敗:", err);
-      });
-    }
-  }
-
-  const stateRef = ref(db, "state");
-
-  onValue(stateRef, (snapshot) => {
-
-    const state = snapshot.val();
-
-    console.log("Firebase raw:", state);
-
-    if (!state) {
-      console.log("❌ state是空的");
-      return;
-    }
-
-    playVideo(state);
-  });
-
-});
-
+  video.src = "https://raw.githubusercontent.com/RSCCT/FGTC328/main/idle.mp4";
+  video.play();
+}
 </script>
+
+</body>
