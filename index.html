@@ -7,6 +7,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const video = document.getElementById("video");
 
+  console.log("video element:", video); // 🔥 debug
+
   const firebaseConfig = {
     databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
   };
@@ -22,20 +24,45 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   function playVideo(name) {
-    const url = videos[name];
-    if (!url) return;
 
+    console.log("try play:", name);
+
+    const url = videos[name];
+
+    if (!url) {
+      console.log("❌ 無此影片:", name);
+      return;
+    }
+
+    // 🔥 強制重新載入
     video.pause();
-    video.src = url + "?t=" + Date.now();
+    video.removeAttribute("src");
     video.load();
-    video.play().catch(() => {});
+
+    video.src = url + "?t=" + Date.now();
+
+    const p = video.play();
+
+    if (p !== undefined) {
+      p.catch(err => {
+        console.log("❌ play失敗:", err);
+      });
+    }
   }
 
   const stateRef = ref(db, "state");
 
   onValue(stateRef, (snapshot) => {
+
     const state = snapshot.val();
-    console.log("Firebase:", state);
+
+    console.log("Firebase raw:", state);
+
+    if (!state) {
+      console.log("❌ state是空的");
+      return;
+    }
+
     playVideo(state);
   });
 
