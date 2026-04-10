@@ -3,17 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <title>ESP32 Video Control</title>
+
+  <!-- 🎨 全螢幕樣式 -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+    }
+
+    #video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover; /* 🔥 滿版顯示 */
+      background: black;
+    }
+
+    #testBtn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      padding: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>影片測試</h2>
+<!-- 🎬 全螢幕影片 -->
+<video id="video" autoplay muted playsinline></video>
 
-<!-- 🎬 影片 -->
-<video id="video" width="320" autoplay muted playsinline controls></video>
-
-<!-- 🔘 手動測試按鈕（超重要） -->
-<button onclick="testPlay()">測試播放</button>
+<!-- 🔘 測試按鈕 -->
+<button id="testBtn" onclick="testPlay()">測試播放</button>
 
 <script type="module">
 
@@ -26,7 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   console.log("video element:", video);
 
-  // 🔥 你的 Firebase
+  // 🔥 Firebase 設定
   const firebaseConfig = {
     databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
   };
@@ -34,7 +60,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // 🔥 改用 github raw 正確版本
+  // 🔥 影片來源（已修正可播放）
   const base = "https://github.com/RSCCT/FGTC328/raw/main/";
 
   const videos = {
@@ -53,7 +79,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 🔥 強制刷新
+    // 🔥 強制刷新（避免卡住）
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -67,7 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🔥 Firebase 監聽
+  // 🔥 Firebase 即時監聽
   const stateRef = ref(db, "state");
 
   onValue(stateRef, (snapshot) => {
@@ -83,7 +109,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// 🔥 手動測試（確認影片能不能播）
+// 🔥 手動測試（確認影片 OK）
 window.testPlay = function () {
   const video = document.getElementById("video");
 
