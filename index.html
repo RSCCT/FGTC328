@@ -30,7 +30,7 @@
 <script>
 const video = document.getElementById("video");
 
-// 👉 GitHub影片（改成你的）
+// 👉 GitHub影片
 const base = "https://raw.githubusercontent.com/RSCCT/FGTC328/main/";
 
 const videos = {
@@ -38,48 +38,41 @@ const videos = {
   idle2: base + "idle2.mp4"
 };
 
-// 👉 播放函式
 function playVideo(name) {
   const url = videos[name];
   if (!url) return;
 
   video.pause();
-
-  video.src = url + "?t=" + Date.now(); // 🔥 防快取
+  video.src = url + "?t=" + Date.now(); // 防快取
   video.load();
 
-  video.play().catch(err => {
-    console.log("播放被擋");
-  });
+  video.play().catch(err => {});
 }
 
-// 👉 預設播放
-playVideo("idle");
+let current = "";
 
-// 👉 WebSocket 連 ESP32
-//const ws = new WebSocket("ws://" + location.hostname + ":81/");
+// 👉 固定IP（你設定的）
+const ESP32_URL = "http://172.20.10.2/state";
 
-//ws.onmessage = function(event) {
-//  console.log("收到:", event.data);
+// 👉 每秒讀ESP32
+setInterval(async () => {
+  try {
+    const res = await fetch(ESP32_URL);
+    const text = await res.text();
 
-  // ESP32 傳：idle 或 idle2
-//  playVideo(event.data);
-//};
+    if (text !== current) {
+      current = text;
+      console.log("切換:", text);
+      playVideo(text);
+    }
 
-// 👉 測試模式（先確認畫面用）
-let toggle = false;
-
-setInterval(() => {
-  toggle = !toggle;
-
-  if (toggle) {
-    console.log("播放 idle");
-    playVideo("idle");
-  } else {
-    console.log("播放 idle2");
-    playVideo("idle2");
+  } catch (e) {
+    console.log("連不到ESP32");
   }
-}, 3000);
+}, 1000);
+
+// 預設
+playVideo("idle");
 
 </script>
 
