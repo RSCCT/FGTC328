@@ -1,21 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32 Video Control</title>
+</head>
+
 <body>
 
-<video id="video" width="300" controls></video>
+<h2>影片測試</h2>
 
+<!-- 🎬 影片 -->
+<video id="video" width="320" autoplay muted playsinline controls></video>
+
+<!-- 🔘 手動測試按鈕（超重要） -->
 <button onclick="testPlay()">測試播放</button>
 
-<script>
-function testPlay() {
-  const base = "https://github.com/RSCCT/FGTC328/raw/main/";
-  const videos = {
-  idle: base + "idle.mp4",
-  idle2: base + "idle2.mp4"
-};
-  console.log("測試播放");
+<script type="module">
 
-  video.src = "https://raw.githubusercontent.com/RSCCT/FGTC328/main/idle.mp4";
-  video.play();
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  const video = document.getElementById("video");
+
+  console.log("video element:", video);
+
+  // 🔥 你的 Firebase
+  const firebaseConfig = {
+    databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 🔥 改用 github raw 正確版本
+  const base = "https://github.com/RSCCT/FGTC328/raw/main/";
+
+  const videos = {
+    idle: base + "idle.mp4",
+    idle2: base + "idle2.mp4"
+  };
+
+  function playVideo(name) {
+
+    console.log("播放狀態:", name);
+
+    const url = videos[name];
+
+    if (!url) {
+      console.log("❌ 找不到影片:", name);
+      return;
+    }
+
+    // 🔥 強制刷新
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+
+    video.src = url + "?t=" + Date.now();
+
+    video.play().then(() => {
+      console.log("✅ 播放成功");
+    }).catch(err => {
+      console.log("❌ 播放失敗:", err);
+    });
+  }
+
+  // 🔥 Firebase 監聽
+  const stateRef = ref(db, "state");
+
+  onValue(stateRef, (snapshot) => {
+
+    const state = snapshot.val();
+
+    console.log("Firebase:", state);
+
+    if (!state) return;
+
+    playVideo(state);
+  });
+
+});
+
+// 🔥 手動測試（確認影片能不能播）
+window.testPlay = function () {
+  const video = document.getElementById("video");
+
+  video.src = "https://github.com/RSCCT/FGTC328/raw/main/idle.mp4";
+
+  video.play().then(() => {
+    console.log("✅ 測試播放成功");
+  }).catch(err => {
+    console.log("❌ 測試播放失敗:", err);
+  });
+};
+
 </script>
 
 </body>
+</html>
