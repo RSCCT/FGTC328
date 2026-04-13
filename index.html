@@ -12,7 +12,9 @@
     background: black;
     display: flex;
     height: 100vh;
-    gap: 10px;
+
+    /* 🔥 間距增加 1cm */
+    gap: calc(10px + 1cm);
   }
 
   .player {
@@ -23,10 +25,21 @@
     background: black;
   }
 
+  /* 🔥 影片視窗縮小到90% */
+  .video-box {
+    width: 90%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* 🔥 保證影片不超出 */
   video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* 不裁切、不溢出 */
+    background: black;
   }
 </style>
 </head>
@@ -34,11 +47,15 @@
 <body>
 
 <div class="player">
-  <video id="video1" autoplay muted playsinline></video>
+  <div class="video-box">
+    <video id="video1" autoplay muted playsinline></video>
+  </div>
 </div>
 
 <div class="player">
-  <video id="video2" autoplay muted playsinline></video>
+  <div class="video-box">
+    <video id="video2" autoplay muted playsinline></video>
+  </div>
 </div>
 
 <script type="module">
@@ -57,7 +74,7 @@ const db = getDatabase(app);
 // 🎬 影片來源
 const base = "https://github.com/RSCCT/FGTC328/raw/main/";
 
-// 👉 只保留 idle
+// 👉 三角色 idle
 const videos = {
   A: base + "idle.mp4",
   B: base + "idle2.mp4",
@@ -67,12 +84,11 @@ const videos = {
 const v1 = document.getElementById("video1");
 const v2 = document.getElementById("video2");
 
-// 👉 播放（只播角色）
+// 👉 播放
 function play(video, char) {
   const url = videos[char];
   if (!url) return;
 
-  // 避免重複載入
   if (video.src.includes(url)) return;
 
   video.src = url + "?t=" + Date.now();
