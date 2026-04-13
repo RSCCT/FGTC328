@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ESP32 Video Control</title>
+<meta charset="UTF-8">
+<title>Battle Screen</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+  body {
+    margin: 0;
+    background: black;
+    display: flex;
+    height: 100vh;
+    gap: 10px; /* 🔥 中間間隔 */
+  }
 
-    /* 🎯 固定容器（關鍵） */
-    #container {
-      width: 100vw;
-      max-width: 480px;   /* 👉 手機固定寬度 */
-      aspect-ratio: 9 / 16; /* 👉 直式比例（可改） */
-      background: black;
-      overflow: hidden;
-      position: relative;
-    }
+  .player {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+  }
 
-    /* 🎬 影片填滿容器 */
-    #video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: black;
-    }
-  </style>
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
 </head>
 
 <body>
 
-<div id="container">
-  <video id="video" autoplay muted playsinline preload="auto"></video>
+<div class="player">
+  <video id="video1" autoplay muted playsinline></video>
+</div>
+
+<div class="player">
+  <video id="video2" autoplay muted playsinline></video>
 </div>
 
 <script type="module">
@@ -48,49 +46,81 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-window.addEventListener("DOMContentLoaded", () => {
+// 🔥 Firebase
+const firebaseConfig = {
+  databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
+};
 
-  const video = document.getElementById("video");
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  // 🔥 預設影片（避免閃動）
-  video.src = "https://github.com/RSCCT/FGTC328/raw/main/idle.mp4";
-  video.play().catch(() => {});
+// 🎬 影片來源
+const base = "https://github.com/RSCCT/FGTC328/raw/main/";
 
-  // 🔥 Firebase
-  const firebaseConfig = {
-    databaseURL: "https://fightgame-b7536-default-rtdb.firebaseio.com/"
-  };
+// 👉 影片命名規則（你之後照這樣放）
+const videos = {
+  A_idle: base + "idle.mp4",
+  B_idle: base + "idle2.mp4",
+  C_idle: base + "idle.mp4",
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  A_win: base + "idle.mp4",
+  B_win: base + "idle2.mp4",
+  C_win: base + "idle.mp4",
 
-  const base = "https://github.com/RSCCT/FGTC328/raw/main/";
+  A_lose: base + "idle2.mp4",
+  B_lose: base + "idle.mp4",
+  C_lose: base + "idle2.mp4"
+};
 
-  const videos = {
-    idle: base + "idle.mp4",
-    idle2: base + "idle2.mp4"
-  };
+const v1 = document.getElementById("video1");
+const v2 = document.getElementById("video2");
 
-  function playVideo(name) {
+// 👉 播放函式
+function play(video, key) {
+  const url = videos[key];
+  if (!url) return;
 
-    const url = videos[name];
-    if (!url) return;
+  if (video.src.includes(url)) return;
 
-    // 👉 同影片不重播
-    if (video.src.includes(url)) return;
+  video.src = url + "?t=" + Date.now();
+  video.play().catch(()=>{});
+}
 
-    video.src = url + "?t=" + Date.now();
-    video.play().catch(() => {});
+// 🔥 監聽 Firebase
+const refAll = ref(db, "/");
+
+onValue(refAll, (snap) => {
+
+  const data = snap.val();
+
+  if (!data) return;
+
+  const p1 = data.player1;
+  const p2 = data.player2;
+  const result = data.result;
+
+  if (!p1 || !p2) return;
+
+  // 🎯 判斷顯示狀態
+  let state1 = "idle";
+  let state2 = "idle";
+
+  if (result === "P1") {
+    state1 = "win";
+    state2 = "lose";
+  }
+  else if (result === "P2") {
+    state1 = "lose";
+    state2 = "win";
+  }
+  else if (result === "S") {
+    state1 = "idle";
+    state2 = "idle";
   }
 
-  const stateRef = ref(db, "state");
-
-  onValue(stateRef, (snapshot) => {
-    const state = snapshot.val();
-    if (!state) return;
-
-    playVideo(state);
-  });
+  // 🎬 播放
+  play(v1, p1 + "_" + state1);
+  play(v2, p2 + "_" + state2);
 
 });
 
